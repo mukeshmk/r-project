@@ -22,3 +22,16 @@ proj_model_resp <-rpart(Response ~ ., data=proj_data, method='class',
                         control=rpart.control(minsplit=30, minbucket=15, maxdepth=8 ))
 # ploting the DT with all the data
 plot(as.party(proj_model_resp))
+
+# converting the 'Response' into a categorical value 'target'
+target = ifelse(Response==1,'Y','N')
+
+proj_data <- data.frame(proj_data, target)
+# removing 'Response' from the data
+proj_data <- proj_data[,-1]
+
+# creating the same model with the Target variable as the categorical value
+# model includes all the X's, Y's and Group
+proj_model_tar <-rpart(target ~ ., data=proj_data, method='class', 
+                       control=rpart.control(minsplit=30, minbucket=15, maxdepth=8 ))
+plot(as.party(proj_model_tar))
