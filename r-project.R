@@ -35,3 +35,17 @@ proj_data <- proj_data[,-1]
 proj_model_tar <-rpart(target ~ ., data=proj_data, method='class', 
                        control=rpart.control(minsplit=30, minbucket=15, maxdepth=8 ))
 plot(as.party(proj_model_tar))
+
+# getting only X cols
+Xdata = proj_data[c(2:8)]
+# creating a model with only X's
+proj_model_X <-rpart(target ~ ., data=Xdata, method='class', 
+                     control=rpart.control(minsplit=30, minbucket=15, maxdepth=8 ))
+plot(as.party(proj_model_X))
+
+# getting only Y cols
+Ydata = proj_data[c(9:15)]
+# creating a model with only Y's
+proj_model_Y <-rpart(target ~ ., data=Ydata, method='class', 
+                     control=rpart.control(minsplit=30, minbucket=15, maxdepth=8 ))
+plot(as.party(proj_model_Y))
