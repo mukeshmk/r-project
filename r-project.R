@@ -1,6 +1,7 @@
 library(rpart)
 library(partykit)
 library(readxl)
+library(caret)
 
 rm(list=ls())
 
@@ -31,18 +32,34 @@ proj_model_resp <-rpart(Response ~ ., data=train_data, method='class',
 # ploting the DT with all the data
 plot(as.party(proj_model_resp))
 
+# prediciting the values of target variable based on the above model
+predictions <- predict(proj_model_resp, test_data[c(2: 16)], type='class')
+# summarize results
+cm<-confusionMatrix(table(test_data$Response, predictions))
+round(cm$overall[1],2)
+
 # converting the 'Response' into a categorical value 'target'
-target = ifelse(Response==1,'Y','N')
+target = ifelse(train_data$Response==1,'Y','N')
 
 train_data <- data.frame(train_data, target)
 # removing 'Response' from the data
 train_data <- train_data[,-1]
 
+test_target = ifelse(test_data$Response==1,'Y','N')
+test_data <- data.frame(test_data, test_target)
+test_data <- test_data[,-1]
+
 # creating the same model with the Target variable as the categorical value
 # model includes all the X's, Y's and Group
-proj_model_tar <-rpart(target ~ ., data=train_data, method='class', 
+proj_model_tar <-rpart(train_data$target ~ ., data=train_data, method='class', 
                        control=rpart.control(minsplit=30, minbucket=15, maxdepth=8 ))
 plot(as.party(proj_model_tar))
+
+# prediciting the values of target variable based on the above model
+predictions <- predict(proj_model_tar, test_data[c(1: 15)], type='class')
+# summarize results
+cm<-confusionMatrix(table(test_data$test_target, predictions))
+round(cm$overall[1],2)
 
 # getting only X cols
 Xdata = train_data[c(2:8)]
