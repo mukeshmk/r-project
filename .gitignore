@@ -1,0 +1,6 @@
+# R Project ignore files/folders
+r-project.Rproj
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
