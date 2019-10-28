@@ -49,3 +49,26 @@ Ydata = proj_data[c(9:15)]
 proj_model_Y <-rpart(target ~ ., data=Ydata, method='class', 
                      control=rpart.control(minsplit=30, minbucket=15, maxdepth=8 ))
 plot(as.party(proj_model_Y))
+
+# creating a model with X's and Y's without Group
+XYdata = proj_data[c(2:14)]
+proj_model_XY <-rpart(target ~ ., data=XYdata, method='class', 
+                      control=rpart.control(minsplit=30, minbucket=15, maxdepth=8 ))
+plot(as.party(proj_model_XY))
+
+# getting data of only X's and Group
+XGdata = proj_data[c(1:8, 16)]
+# spliting data based on Group
+XGdata = split(XGdata, XGdata$Group)
+XGdata0 = XGdata[[1]]
+XGdata1 = XGdata[[2]]
+
+# creating a model with X's and Group 0
+proj_model_XG0 <-rpart(XGdata0$target ~ ., data=XGdata0, method='class', 
+                       control=rpart.control(minsplit=30, minbucket=15, maxdepth=8 ))
+plot(as.party(proj_model_XG0))
+
+# creating a model with X's and Group 1
+proj_model_XG1 <-rpart(XGdata1$target ~ ., data=XGdata1, method='class', 
+                       control=rpart.control(minsplit=30, minbucket=15, maxdepth=8 ))
+plot(as.party(proj_model_XG1))
