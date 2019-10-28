@@ -89,3 +89,17 @@ plot(as.party(proj_model_YG0))
 proj_model_YG1 <-rpart(YGdata1$target ~ ., data=YGdata1, method='class', 
                        control=rpart.control(minsplit=30, minbucket=15, maxdepth=8 ))
 plot(as.party(proj_model_YG1))
+
+# spliting data based on Group
+XYGdata = split(proj_data, proj_data$Group)
+XYGdata0 = XYGdata[[1]]
+XYGdata1 = XYGdata[[2]]
+# creating a model with XY's and Group 0
+proj_model_XYG0 <-rpart(XYGdata0$target ~ ., data=XYGdata0, method='class', 
+                        control=rpart.control(minsplit=30, minbucket=15, maxdepth=8 ))
+plot(as.party(proj_model_XYG0))
+
+# creating a model with XY's and Group 1
+proj_model_XYG1 <-rpart(XYGdata1$target ~ ., data=XYGdata1, method='class', 
+                        control=rpart.control(minsplit=30, minbucket=15, maxdepth=8 ))
+plot(as.party(proj_model_XYG1))
