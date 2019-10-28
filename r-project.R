@@ -68,6 +68,12 @@ proj_model_X <-rpart(target ~ ., data=Xdata, method='class',
                      control=rpart.control(minsplit=30, minbucket=15, maxdepth=8 ))
 plot(as.party(proj_model_X))
 
+# prediciting the values of target variable based on the above model
+predictions <- predict(proj_model_X, test_data[c(2: 8)], type='class')
+# summarize results
+cm<-confusionMatrix(table(test_data$test_target, predictions))
+round(cm$overall[1],2)
+
 # getting only Y cols
 Ydata = train_data[c(9:15)]
 # creating a model with only Y's
@@ -75,11 +81,23 @@ proj_model_Y <-rpart(target ~ ., data=Ydata, method='class',
                      control=rpart.control(minsplit=30, minbucket=15, maxdepth=8 ))
 plot(as.party(proj_model_Y))
 
+# prediciting the values of target variable based on the above model
+predictions <- predict(proj_model_Y, test_data[c(9: 15)], type='class')
+# summarize results
+cm<-confusionMatrix(table(test_data$test_target, predictions))
+round(cm$overall[1],2)
+
 # creating a model with X's and Y's without Group
-XYdata = train_data[c(2:14)]
+XYdata = train_data[c(2:15)]
 proj_model_XY <-rpart(target ~ ., data=XYdata, method='class', 
                       control=rpart.control(minsplit=30, minbucket=15, maxdepth=8 ))
 plot(as.party(proj_model_XY))
+
+# prediciting the values of target variable based on the above model
+predictions <- predict(proj_model_XY, test_data[c(2: 15)], type='class')
+# summarize results
+cm<-confusionMatrix(table(test_data$test_target, predictions))
+round(cm$overall[1],2)
 
 # getting data of only X's and Group
 XGdata = train_data[c(1:8, 16)]
@@ -93,10 +111,22 @@ proj_model_XG0 <-rpart(XGdata0$target ~ ., data=XGdata0, method='class',
                        control=rpart.control(minsplit=30, minbucket=15, maxdepth=8 ))
 plot(as.party(proj_model_XG0))
 
+# prediciting the values of target variable based on the above model
+predictions <- predict(proj_model_XG0, test_data[c(1:8, 16)], type='class')
+# summarize results
+cm<-confusionMatrix(table(test_data$test_target, predictions))
+round(cm$overall[1],2)
+
 # creating a model with X's and Group 1
 proj_model_XG1 <-rpart(XGdata1$target ~ ., data=XGdata1, method='class', 
                        control=rpart.control(minsplit=30, minbucket=15, maxdepth=8 ))
 plot(as.party(proj_model_XG1))
+
+# prediciting the values of target variable based on the above model
+predictions <- predict(proj_model_XG1, test_data[c(1:8, 16)], type='class')
+# summarize results
+cm<-confusionMatrix(table(test_data$test_target, predictions))
+round(cm$overall[1],2)
 
 # getting data of only Y's and Group
 YGdata = train_data[c(1, 9:15, 16)]
@@ -110,10 +140,22 @@ proj_model_YG0 <-rpart(YGdata0$target ~ ., data=YGdata0, method='class',
                        control=rpart.control(minsplit=30, minbucket=15, maxdepth=8 ))
 plot(as.party(proj_model_YG0))
 
+# prediciting the values of target variable based on the above model
+predictions <- predict(proj_model_YG0, test_data[c(1, 9:15, 16)], type='class')
+# summarize results
+cm<-confusionMatrix(table(test_data$test_target, predictions))
+round(cm$overall[1],2)
+
 # creating a model with Y's and Group 1
 proj_model_YG1 <-rpart(YGdata1$target ~ ., data=YGdata1, method='class', 
                        control=rpart.control(minsplit=30, minbucket=15, maxdepth=8 ))
 plot(as.party(proj_model_YG1))
+
+# prediciting the values of target variable based on the above model
+predictions <- predict(proj_model_YG1, test_data[c(1, 9:15, 16)], type='class')
+# summarize results
+cm<-confusionMatrix(table(test_data$test_target, predictions))
+round(cm$overall[1],2)
 
 # spliting data based on Group
 XYGdata = split(train_data, train_data$Group)
@@ -124,7 +166,19 @@ proj_model_XYG0 <-rpart(XYGdata0$target ~ ., data=XYGdata0, method='class',
                         control=rpart.control(minsplit=30, minbucket=15, maxdepth=8 ))
 plot(as.party(proj_model_XYG0))
 
+# prediciting the values of target variable based on the above model
+predictions <- predict(proj_model_XYG0, test_data, type='class')
+# summarize results
+cm<-confusionMatrix(table(test_data$test_target, predictions))
+round(cm$overall[1],2)
+
 # creating a model with XY's and Group 1
 proj_model_XYG1 <-rpart(XYGdata1$target ~ ., data=XYGdata1, method='class', 
                         control=rpart.control(minsplit=30, minbucket=15, maxdepth=8 ))
 plot(as.party(proj_model_XYG1))
+
+# prediciting the values of target variable based on the above model
+predictions <- predict(proj_model_XYG1, test_data, type='class')
+# summarize results
+cm<-confusionMatrix(table(test_data$test_target, predictions))
+round(cm$overall[1],2)
