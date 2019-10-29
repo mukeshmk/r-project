@@ -17,7 +17,7 @@ attach(proj_data)
 str(proj_data)
 
 # setting the random seed so that partition is reproducible
-set.seed(456)
+set.seed(123)
 train_ind <- sample(seq_len(nrow(proj_data)), size = floor(0.8 * nrow(proj_data)))
 
 # Spliting the Data Set into Training and Testing data
@@ -28,7 +28,7 @@ test_data <- data.frame(proj_data[-train_ind, ])
 # method='class' is used for a classification tree
 # model includes all the X's, Y's and Group
 proj_model_resp <-rpart(Response ~ ., data=train_data, method='class', 
-                        control=rpart.control(minsplit=30, minbucket=15, maxdepth=8 ))
+                        control=rpart.control(minsplit=30, minbucket=10, maxdepth=8 ))
 # ploting the DT with all the data
 plot(as.party(proj_model_resp))
 
@@ -52,7 +52,7 @@ test_data <- test_data[,-1]
 # creating the same model with the Target variable as the categorical value
 # model includes all the X's, Y's and Group
 proj_model_tar <-rpart(train_data$target ~ ., data=train_data, method='class', 
-                       control=rpart.control(minsplit=30, minbucket=15, maxdepth=8 ))
+                       control=rpart.control(minsplit=30, minbucket=10, maxdepth=8 ))
 plot(as.party(proj_model_tar))
 
 # prediciting the values of target variable based on the above model
@@ -65,7 +65,7 @@ round(cm$overall[1],2)
 Xdata = train_data[c(2:8)]
 # creating a model with only X's
 proj_model_X <-rpart(target ~ ., data=Xdata, method='class', 
-                     control=rpart.control(minsplit=30, minbucket=15, maxdepth=8 ))
+                     control=rpart.control(minsplit=30, minbucket=10, maxdepth=8 ))
 plot(as.party(proj_model_X))
 
 # prediciting the values of target variable based on the above model
@@ -78,7 +78,7 @@ round(cm$overall[1],2)
 Ydata = train_data[c(9:15)]
 # creating a model with only Y's
 proj_model_Y <-rpart(target ~ ., data=Ydata, method='class', 
-                     control=rpart.control(minsplit=30, minbucket=15, maxdepth=8 ))
+                     control=rpart.control(minsplit=30, minbucket=10, maxdepth=8 ))
 plot(as.party(proj_model_Y))
 
 # prediciting the values of target variable based on the above model
@@ -90,7 +90,7 @@ round(cm$overall[1],2)
 # creating a model with X's and Y's without Group
 XYdata = train_data[c(2:15)]
 proj_model_XY <-rpart(target ~ ., data=XYdata, method='class', 
-                      control=rpart.control(minsplit=30, minbucket=15, maxdepth=8 ))
+                      control=rpart.control(minsplit=30, minbucket=10, maxdepth=8 ))
 plot(as.party(proj_model_XY))
 
 # prediciting the values of target variable based on the above model
@@ -108,7 +108,7 @@ XGdata1 = XGdata[[2]]
 
 # creating a model with X's and Group 0
 proj_model_XG0 <-rpart(XGdata0$target ~ ., data=XGdata0, method='class', 
-                       control=rpart.control(minsplit=30, minbucket=15, maxdepth=8 ))
+                       control=rpart.control(minsplit=30, minbucket=10, maxdepth=8 ))
 plot(as.party(proj_model_XG0))
 
 # prediciting the values of target variable based on the above model
@@ -119,7 +119,7 @@ round(cm$overall[1],2)
 
 # creating a model with X's and Group 1
 proj_model_XG1 <-rpart(XGdata1$target ~ ., data=XGdata1, method='class', 
-                       control=rpart.control(minsplit=30, minbucket=15, maxdepth=8 ))
+                       control=rpart.control(minsplit=30, minbucket=10, maxdepth=8 ))
 plot(as.party(proj_model_XG1))
 
 # prediciting the values of target variable based on the above model
@@ -137,7 +137,7 @@ YGdata1 = YGdata[[2]]
 
 # creating a model with Y's and Group 0
 proj_model_YG0 <-rpart(YGdata0$target ~ ., data=YGdata0, method='class', 
-                       control=rpart.control(minsplit=30, minbucket=15, maxdepth=8 ))
+                       control=rpart.control(minsplit=30, minbucket=10, maxdepth=8 ))
 plot(as.party(proj_model_YG0))
 
 # prediciting the values of target variable based on the above model
@@ -148,7 +148,7 @@ round(cm$overall[1],2)
 
 # creating a model with Y's and Group 1
 proj_model_YG1 <-rpart(YGdata1$target ~ ., data=YGdata1, method='class', 
-                       control=rpart.control(minsplit=30, minbucket=15, maxdepth=8 ))
+                       control=rpart.control(minsplit=30, minbucket=10, maxdepth=8 ))
 plot(as.party(proj_model_YG1))
 
 # prediciting the values of target variable based on the above model
@@ -163,7 +163,7 @@ XYGdata0 = XYGdata[[1]]
 XYGdata1 = XYGdata[[2]]
 # creating a model with XY's and Group 0
 proj_model_XYG0 <-rpart(XYGdata0$target ~ ., data=XYGdata0, method='class', 
-                        control=rpart.control(minsplit=30, minbucket=15, maxdepth=8 ))
+                        control=rpart.control(minsplit=30, minbucket=10, maxdepth=8 ))
 plot(as.party(proj_model_XYG0))
 
 # prediciting the values of target variable based on the above model
@@ -174,7 +174,7 @@ round(cm$overall[1],2)
 
 # creating a model with XY's and Group 1
 proj_model_XYG1 <-rpart(XYGdata1$target ~ ., data=XYGdata1, method='class', 
-                        control=rpart.control(minsplit=30, minbucket=15, maxdepth=8 ))
+                        control=rpart.control(minsplit=30, minbucket=10, maxdepth=8 ))
 plot(as.party(proj_model_XYG1))
 
 # prediciting the values of target variable based on the above model
