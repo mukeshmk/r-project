@@ -1,245 +1,235 @@
-#install.packages("party")
-#nstall.packages ("partykit") 
-#nstall.packages ("rpart") 
+library(readxl)
+library(partykit)
+library(rpart)
+library(caret)
+library(mice)
 
-library(party)
-library("partykit") 
-library("rpart") 
-  
-Data <- read.csv("D:\\code\\data-analytics\\ca-2\\data.csv", header=TRUE, sep= ",")
-print(head(Data))
-#head(Data$X2)
-#handle null data
-random.imp <- function(a){
-  missing <- is.na(a)
-  n.missing <- sum(missing)
-  a.obs <- a[!missing]
-  imputed <- a
-  imputed[missing] <- sample(a.obs, n.missing, replace = TRUE)
-  return(imputed)
-}
+# install.packages('mice')
 
-#fill null data of X
-Data$X1 <- random.imp(Data$X1)
-Data$X2 <- random.imp(Data$X2)
-Data$X3 <- random.imp(Data$X3)
-Data$X4 <- random.imp(Data$X4)
-Data$X5 <- random.imp(Data$X5)
-Data$X6 <- random.imp(Data$X6)
-Data$X7 <- random.imp(Data$X7)
-#fill null data of Y
-Data$Y1 <- random.imp(Data$Y1)
-Data$Y2 <- random.imp(Data$Y2)
-Data$Y3 <- random.imp(Data$Y3)
-Data$Y4 <- random.imp(Data$Y4)
-Data$Y5 <- random.imp(Data$Y5)
-Data$Y6 <- random.imp(Data$Y6)
-Data$Y7 <- random.imp(Data$Y7)
+Project_Data <-read_excel("D:\\code\\data-analytics\\r-project\\ca2\\project-data.xlsx")
 
-#check if any null values
-sum(is.na(Data))
+md.pattern(Project_Data)
+tempData <- mice(Project_Data,m=5,maxit=50,meth='pmm',seed=500)
+tempData$imp$Group
+ImpProject_Data<-complete(tempData,1)
 
+ImpProject_Data <- ImpProject_Data[,-1]
 
-#Decision tree using X data
-print(head(Data[c(4:10)]))
-# Create the input data frame.
-input_X <- Data[c(4:10)]
-str(input_X) 
-attach(input_X)
-DT_Model_X <-rpart(Data$Response~., data=input_X, method='class', control=rpart.control(minsplit=30, minbucket=10, maxdepth=8))
-plot(as.party(DT_Model_X)) 
-print(DT_Model_X)
-#Prune the tree
-opt <- which.min(DT_Model_X$cptable [, "xerror"])
-cp <- DT_Model_X$cptable [opt,"CP"]
-DT_Model_X_pruned <- prune(DT_Model_X, cp=cp)
-plot(as.party(DT_Model_X_pruned))
-#Calculate accuracy of tree
-prediction_X = predict(DT_Model_X_pruned, Data, type="class")
-table_mat_X <- table(Data$Response, prediction_X)
-accuracy_Test_X <- sum(diag(table_mat_X)) / sum(table_mat_X)
-print(paste("Accuracy for Decision tree using X data: ",accuracy_Test_X))
-print(DT_Model_X_pruned)
-summary(DT_Model_X_pruned)
+attach(ImpProject_Data)
 
-#Decision tree using Y data
-print(head(Data[c(11:17)]))
-# Create the input data frame.
-input_Y <- Data[c(11:17)]
-str(input_Y) 
-attach(input_Y)
-DT_Model_Y <-rpart(Data$Response~., data=input_Y, method='class', control=rpart.control(minsplit=30, minbucket=10, maxdepth=8))
-plot(as.party(DT_Model_Y)) 
-print(DT_Model_Y)
-#Prune the tree
-opt <- which.min(DT_Model_Y$cptable [, "xerror"])
-cp <- DT_Model_Y$cptable [opt,"CP"]
-DT_Model_Y_pruned <- prune(DT_Model_Y, cp=cp)
-plot(as.party(DT_Model_Y_pruned))
-#Calculate accuracy of tree
-prediction_Y = predict(DT_Model_Y_pruned, Data, type="class")
-table_mat_Y <- table(Data$Response, prediction_Y)
-accuracy_Test_Y <- sum(diag(table_mat_Y)) / sum(table_mat_Y)
-print(paste("Accuracy for Decision tree using Y data: ",accuracy_Test_Y))
-summary(DT_Model_Y_pruned)
+set.seed(123)
+train_ind <- sample(seq_len(nrow(ImpProject_Data)), size = floor(0.8 * nrow(ImpProject_Data)))
 
-#Decision tree using X & Y data 
-print(head(Data[c(4:17)]))
-# Create the input data frame.
-input_XY <- Data[c(4:17)]
-str(input_XY) 
-attach(input_XY)
-DT_Model_XY <-rpart(Data$Response~., data=input_XY, method='class', control=rpart.control(minsplit=30, minbucket=10, maxdepth=8))
-plot(as.party(DT_Model_XY)) 
-print(DT_Model_XY)
-#Prune the tree
-opt <- which.min(DT_Model_XY$cptable [, "xerror"])
-cp <- DT_Model_XY$cptable [opt,"CP"]
-DT_Model_XY_pruned <- prune(DT_Model_XY, cp=cp)
-plot(as.party(DT_Model_XY_pruned))
-#Calculate accuracy of tree
-prediction_XY = predict(DT_Model_XY_pruned, Data, type="class")
-table_mat_XY <- table(Data$Response, prediction_XY)
-accuracy_Test_XY <- sum(diag(table_mat_XY)) / sum(table_mat_XY)
-print(paste("Accuracy for Decision tree using X & Y data: ",accuracy_Test_XY))
-summary(DT_Model_XY_pruned)
+train_data <- data.frame(ImpProject_Data[train_ind, ])
+test_data <- data.frame(ImpProject_Data[-train_ind, ])
 
-#Decision tree using X data for group 0
-# Create the input data frame.
-input_X_Group <- Data[c(2:10)]
-input_X_G0 <- subset(input_X_Group, Group == 0)
-print(head(input_X_G0))
-str(input_X_G0) 
-attach(input_X_G0)
-DT_Model_X_G0 <-rpart(Response~., data=input_X_G0, method='class',control=rpart.control(minsplit=30, minbucket=10, maxdepth=8))
-plot(as.party(DT_Model_X_G0)) 
-print(DT_Model_X_G0)
-#Prune the tree
-opt <- which.min(DT_Model_X_G0$cptable [, "xerror"])
-cp <- DT_Model_X_G0$cptable [opt,"CP"]
-DT_Model_X_G0_pruned <- prune(DT_Model_X_G0, cp=cp)
-plot(as.party(DT_Model_X_G0_pruned))
-#Calculate accuracy of tree
-prediction_X_G0 = predict(DT_Model_X_G0_pruned, Data, type="class")
-table_mat_X_G0 <- table(Data$Response, prediction_X_G0)
-accuracy_Test_X_G0 <- sum(diag(table_mat_X_G0)) / sum(table_mat_X_G0)
-print(paste("Accuracy for Decision tree using X data for group 0: ",accuracy_Test_X_G0))
-summary(DT_Model_X_G0_pruned)
+proj_model_resp <-rpart(Response ~ ., data=train_data, method='class', control=rpart.control(minsplit=30, minbucket=10, maxdepth=8 ))
 
-#Decision tree using Y data for group 0
-# Create the input data frame.
-input_Y_Group <- Data[c(2,3,11,12,13,14,15,16,17)]
-input_Y_G0 <- subset(input_Y_Group, Group == 0)
-str(input_Y_G0) 
-attach(input_Y_G0)
-DT_Model_Y_G0 <-rpart(Response~., data=input_Y_G0, method='class', control=rpart.control(minsplit=30, minbucket=10, maxdepth=8))
-plot(as.party(DT_Model_Y_G0)) 
-print(DT_Model_Y_G0)
-#Prune the tree
-opt <- which.min(DT_Model_Y_G0$cptable [, "xerror"])
-cp <- DT_Model_Y_G0$cptable [opt,"CP"]
-DT_Model_Y_G0_pruned <- prune(DT_Model_Y_G0, cp=cp)
-plot(as.party(DT_Model_Y_G0_pruned))
-#Calculate accuracy of tree
-prediction_Y_G0 = predict(DT_Model_Y_G0_pruned, Data, type="class")
-table_mat_Y_G0 <- table(Data$Response, prediction_Y_G0)
-accuracy_Test_Y_G0 <- sum(diag(table_mat_Y_G0)) / sum(table_mat_Y_G0)
-print(paste("Accuracy for Decision tree using Y data for group 0: ",accuracy_Test_Y_G0))
-summary(DT_Model_Y_G0_pruned)
+plot(as.party(proj_model_resp))
 
-#Decision tree using X & Y data for group 0
-# Create the input data frame.
-input_XY_Group <- Data[c(2:17)]
-input_XY_G0 <- subset(input_XY_Group, Group == 0)
-str(input_XY_G0) 
-attach(input_XY_G0)
-DT_Model_XY_G0 <-rpart(Response~., data=input_XY_G0, method='class', control=rpart.control(minsplit=30, minbucket=10, maxdepth=8))
-plot(as.party(DT_Model_XY_G0)) 
-print(DT_Model_XY_G0)
-#Prune the tree
-opt <- which.min(DT_Model_XY_G0$cptable [, "xerror"])
-cp <- DT_Model_XY_G0$cptable [opt,"CP"]
-DT_Model_XY_G0_pruned <- prune(DT_Model_XY_G0, cp=cp)
-plot(as.party(DT_Model_XY_G0_pruned))
-#Calculate accuracy of tree
-prediction_XY_G0 = predict(DT_Model_XY_G0_pruned, Data, type="class")
-table_mat_XY_G0 <- table(Data$Response, prediction_XY_G0)
-accuracy_Test_XY_G0 <- sum(diag(table_mat_XY_G0)) / sum(table_mat_XY_G0)
-print(paste("Accuracy for Decision tree using X & Y data for group 0: ",accuracy_Test_XY_G0))
-summary(DT_Model_XY_G0_pruned)
+# predict
+predictions <- predict(proj_model_resp, test_data[c(2: 16)], type='class')
+# summarize results
+cm<-confusionMatrix(table(test_data$Response, predictions))
+accuracy<-round(cm$overall[1],2)
+accuracy
 
-#Decision tree using X data for group 1
-# Create the input data frame.
-input_X_G1 <- subset(input_X_Group, Group == 1)
-print(head(input_X_G1))
-str(input_X_G1) 
-attach(input_X_G1)
-DT_Model_X_G1 <-rpart(Response~., data=input_X_G1, method='class', control=rpart.control(minsplit=30, minbucket=10, maxdepth=8))
-plot(as.party(DT_Model_X_G1)) 
-print(DT_Model_X_G1)
-#Prune the tree
-opt <- which.min(DT_Model_X_G1$cptable [, "xerror"])
-cp <- DT_Model_X_G1$cptable [opt,"CP"]
-DT_Model_X_G1_pruned <- prune(DT_Model_X_G1, cp=cp)
-plot(as.party(DT_Model_X_G1_pruned))
-#Calculate accuracy of tree
-prediction_X_G1 = predict(DT_Model_X_G1_pruned, Data, type="class")
-table_mat_X_G1 <- table(Data$Response, prediction_X_G1)
-accuracy_Test_X_G1 <- sum(diag(table_mat_X_G1)) / sum(table_mat_X_G1)
-print(paste("Accuracy for Decision tree using X data for group 1: ",accuracy_Test_X_G1))
-summary(DT_Model_X_G1_pruned)
+# converting the 'Response' into a categorical value 'target'
+target = ifelse(train_data$Response==1,'Y','N')
 
-#Decision tree using Y data for group 1
-# Create the input data frame.
-input_Y_G1 <- subset(input_Y_Group, Group == 1)
-print(head(input_Y_G1))
-str(input_Y_G1) 
-attach(input_Y_G1)
-DT_Model_Y_G1 <-rpart(Response~., data=input_Y_G1, method='class', control=rpart.control(minsplit=30, minbucket=10, maxdepth=8))
-plot(as.party(DT_Model_Y_G1)) 
-print(DT_Model_Y_G1)
-#Prune the tree
-opt <- which.min(DT_Model_Y_G1$cptable [, "xerror"])
-cp <- DT_Model_Y_G1$cptable [opt,"CP"]
-DT_Model_Y_G1_pruned <- prune(DT_Model_Y_G1, cp=cp)
-plot(as.party(DT_Model_Y_G1_pruned))
-#Calculate accuracy of tree
-prediction_Y_G1 = predict(DT_Model_Y_G1_pruned, Data, type="class")
-table_mat_Y_G1 <- table(Data$Response, prediction_Y_G1)
-accuracy_Test_Y_G1 <- sum(diag(table_mat_Y_G1)) / sum(table_mat_Y_G1)
-print(paste("Accuracy for Decision tree using Y data for group 1: ",accuracy_Test_Y_G1))
-summary(DT_Model_Y_G1_pruned)
+train_data <- data.frame(train_data, target)
+# removing 'Response' from the data
+train_data <- train_data[,-1]
+str(train_data)
 
-#Decision tree using X & Y data for group 1
-input_XY_G1 <- subset(input_XY_Group, Group == 1)
-print(head(input_XY_G1))
-str(input_XY_G1) 
-attach(input_XY_G1)
-DT_Model_XY_G1 <-rpart(Response~., data=input_XY_G1, method='class', control=rpart.control(minsplit=30, minbucket=10, maxdepth=8))
-plot(as.party(DT_Model_XY_G1)) 
-print(DT_Model_XY_G1)
-#Prune the tree
-opt <- which.min(DT_Model_XY_G1$cptable [, "xerror"])
-cp <- DT_Model_XY_G1$cptable [opt,"CP"]
-DT_Model_XY_G1_pruned <- prune(DT_Model_XY_G1, cp=cp)
-plot(as.party(DT_Model_XY_G1_pruned))
-summary(DT_Model_XY_G1_pruned)
-#Calculate accuracy of tree
-prediction_XY_G1 = predict(DT_Model_XY_G1_pruned, Data, type="class")
-table_mat_XY_G1 <- table(Data$Response, prediction_XY_G1)
-accuracy_Test_XY_G1 <- sum(diag(table_mat_XY_G1)) / sum(table_mat_XY_G1)
-print(paste("Accuracy for Decision tree using X & Y data for group 1: ",accuracy_Test_XY_G1))
-summary(DT_Model_XY_G1_pruned)
+test_target = ifelse(test_data$Response==1,'Y','N')
+
+test_data <- data.frame(test_data, test_target)
+# removing 'Response' from the data
+test_data <- test_data[,-1]
+str(test_data)
+
+# creating the same model with the Target variable as the categorical value
+# model includes all the X's, Y's and Group
+proj_model_tar <-rpart(train_data$target ~ ., data=train_data, method='class',control=rpart.control(minsplit=30, minbucket=10, maxdepth=8 ))
+plot(as.party(proj_model_tar))
+
+# predict
+predictions <- predict(proj_model_tar, test_data[c(1: 15)], type='class')
+# summarize results
+cm<-confusionMatrix(table(test_data$test_target, predictions))
+accuracy<-round(cm$overall[1],2)
+accuracy
+
+# getting only X cols
+xcols <- c(2:8)
+Xdata = train_data[xcols]
+names(Xdata)
+# creating a model with only X's
+proj_model_X <-rpart(target ~ ., data=Xdata, method='class', 
+                     control=rpart.control(minsplit=30, minbucket=10, maxdepth=8 ))
+png("D:\\code\\data-analytics\\r-project\\ca2\\plots\\X1-X7.png")
+plot(as.party(proj_model_X))
+dev.off()
+
+# predict
+predictions <- predict(proj_model_X, test_data[xcols], type='class')
+# summarize results
+cm<-confusionMatrix(table(test_data$test_target, predictions))
+accuracy<-round(cm$overall[1],2)
+accuracy
+
+# getting only Y cols
+ycols <- c(9:15)
+Ydata = train_data[ycols]
+names(Ydata)
+# creating a model with only Y's
+proj_model_Y <-rpart(target ~ ., data=Ydata, method='class', 
+                     control=rpart.control(minsplit=30, minbucket=10, maxdepth=8 ))
+png("D:\\code\\data-analytics\\r-project\\ca2\\plots\\Y1-Y7.png")
+plot(as.party(proj_model_Y))
+dev.off()
+
+# predict
+predictions <- predict(proj_model_Y, test_data[ycols], type='class')
+# summarize results
+cm<-confusionMatrix(table(test_data$test_target, predictions))
+accuracy<-round(cm$overall[1],2)
+accuracy
+
+# creating a model with X's and Y's without Group
+xycols = c(2:14)
+XYdata = train_data[xycols]
+names(XYdata)
+proj_model_XY <-rpart(target ~ ., data=XYdata, method='class', 
+                      control=rpart.control(minsplit=30, minbucket=10, maxdepth=8 ))
+png("D:\\code\\data-analytics\\r-project\\ca2\\plots\\XYwoG.png")
+plot(as.party(proj_model_XY))
+dev.off()
+
+# predict
+predictions <- predict(proj_model_XY, test_data[xycols], type='class')
+# summarize results
+cm<-confusionMatrix(table(test_data$test_target, predictions))
+accuracy<-round(cm$overall[1],2)
+accuracy
 
 
+# getting data of only X's and Group
+XGcols <- c(1:8, 16)
+XGdata = train_data[XGcols]
+names(XGdata)
+# spliting data based on Group
+XGdata = split(XGdata, XGdata$Group)
+# getting group 0 data
+XGdata0 = XGdata[[1]]
+names(XGdata0)
+# creating a model with X's and Group 0
+proj_model_XG0 <-rpart(XGdata0$target ~ ., data=XGdata0, method='class', 
+                       control=rpart.control(minsplit=30, minbucket=10, maxdepth=8 ))
+png("D:\\code\\data-analytics\\r-project\\ca2\\plots\\XwG.png")
+plot(as.party(proj_model_XG0))
+dev.off()
 
-print(paste("Accuracy for Decision tree using X data: ",accuracy_Test_X))
-print(paste("Accuracy for Decision tree using Y data: ",accuracy_Test_Y))
-print(paste("Accuracy for Decision tree using X & Y data: ",accuracy_Test_XY))
-print(paste("Accuracy for Decision tree using X data for group 0: ",accuracy_Test_X_G0))
-print(paste("Accuracy for Decision tree using Y data for group 0: ",accuracy_Test_Y_G0))
-print(paste("Accuracy for Decision tree using X & Y data for group 0: ",accuracy_Test_XY_G0))
-print(paste("Accuracy for Decision tree using X data for group 1: ",accuracy_Test_X_G1))
-print(paste("Accuracy for Decision tree using Y data for group 1: ",accuracy_Test_Y_G1))
-print(paste("Accuracy for Decision tree using X & Y data for group 1: ",accuracy_Test_XY_G1))
+# predict
+predictions <- predict(proj_model_XG0, test_data[XGcols], type='class')
+# summarize results
+cm<-confusionMatrix(table(test_data$test_target, predictions))
+accuracy<-round(cm$overall[1],2)
+accuracy
+
+
+# getting group 1 data
+XGdata1 = XGdata[[2]]
+names(XGdata1)
+# creating a model with X's and Group 1
+proj_model_XG1 <-rpart(XGdata1$target ~ ., data=XGdata1, method='class', 
+                       control=rpart.control(minsplit=30, minbucket=10, maxdepth=8 ))
+png("D:\\code\\data-analytics\\r-project\\ca2\\plots\\XwG1.png")
+plot(as.party(proj_model_XG1))
+dev.off()
+
+# predict
+predictions <- predict(proj_model_XG1, test_data[XGcols], type='class')
+# summarize results
+cm<-confusionMatrix(table(test_data$test_target, predictions))
+accuracy<-round(cm$overall[1],2)
+accuracy
+
+# getting data of only Y's and Group
+YGcols <- c(1, 9:15, 16)
+YGdata = train_data[YGcols]
+names(YGdata)
+# spliting data based on Group
+YGdata = split(YGdata, YGdata$Group)
+# getting group 0 data
+YGdata0 = YGdata[[1]]
+names(YGdata0)
+# creating a model with Y's and Group 0
+proj_model_YG0 <-rpart(YGdata0$target ~ ., data=YGdata0, method='class', 
+                       control=rpart.control(minsplit=30, minbucket=10, maxdepth=8 ))
+png("D:\\code\\data-analytics\\r-project\\ca2\\plots\\YwG0.png")
+plot(as.party(proj_model_YG0))
+dev.off()
+
+# predict
+predictions <- predict(proj_model_YG0, test_data[YGcols], type='class')
+# summarize results
+cm<-confusionMatrix(table(test_data$test_target, predictions))
+accuracy<-round(cm$overall[1],2)
+accuracy
+
+# getting group 1 data
+YGdata1 = YGdata[[2]]
+names(YGdata1)
+# creating a model with Y's and Group 1
+proj_model_YG1 <-rpart(YGdata1$target ~ ., data=YGdata1, method='class', 
+                       control=rpart.control(minsplit=30, minbucket=10, maxdepth=8 ))
+png("D:\\code\\data-analytics\\r-project\\ca2\\plots\\YwG1.png")
+plot(as.party(proj_model_YG1))
+dev.off()
+
+# predict
+predictions <- predict(proj_model_YG1, test_data[YGcols], type='class')
+# summarize results
+cm<-confusionMatrix(table(test_data$test_target, predictions))
+accuracy<-round(cm$overall[1],2)
+accuracy
+
+# spliting data based on Group
+XYGdata = split(train_data, train_data$Group)
+# getting group 0 data
+XYGdata0 = XYGdata[[1]]
+names(XYGdata0)
+# creating a model with XY's and Group 0
+proj_model_XYG0 <-rpart(XYGdata0$target ~ ., data=XYGdata0, method='class', 
+                        control=rpart.control(minsplit=30, minbucket=10, maxdepth=8 ))
+png("D:\\code\\data-analytics\\r-project\\ca2\\plots\\XYwG0.png")
+plot(as.party(proj_model_XYG0))
+dev.off()
+
+# predict
+predictions <- predict(proj_model_XYG0, test_data, type='class')
+# summarize results
+cm<-confusionMatrix(table(test_data$test_target, predictions))
+accuracy<-round(cm$overall[1],2)
+accuracy
+
+# getting group 1 data
+XYGdata1 = XYGdata[[2]]
+names(XYGdata1)
+# creating a model with XY's and Group 1
+proj_model_XYG1 <-rpart(XYGdata1$target ~ ., data=XYGdata1, method='class', 
+                        control=rpart.control(minsplit=30, minbucket=10, maxdepth=8 ))
+
+png("D:\\code\\data-analytics\\r-project\\ca2\\plots\\XYG0.png")
+plot(as.party(proj_model_XYG1))
+dev.off()
+
+# predict
+predictions <- predict(proj_model_XYG1, test_data, type='class')
+# summarize results
+cm<-confusionMatrix(table(test_data$test_target, predictions))
+accuracy<-round(cm$overall[1],2)
+accuracy
 
